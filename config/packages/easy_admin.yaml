@@ -1,5 +1,14 @@
 easy_admin:
+    site_name: 'Flotilla'
     entities:
         # List the entity class name you want to manage
-        - App\Entity\Archetype
-        - App\Entity\Project
+        Archetype:
+            class: App\Entity\Archetype
+            help: 'An Archetype is a template for a project. Projects will be updateable from their Archetype.'
+            label: 'Site Archetype'
+            list:
+                fields: ['id', 'name', 'gitUri', 'projects']
+            # Trying to disable the Projects field. It doesn't seem to be working. Not sure why.
+#            show:
+#                fields: ['name', 'gitUrl', 'updateBranch', 'updateOperation']
+#        - App\Entity\Project
