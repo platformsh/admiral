@@ -8,7 +8,6 @@ easy_admin:
             label: 'Site Archetype'
             list:
                 fields: ['id', 'name', 'gitUri', 'projects']
-            # Trying to disable the Projects field. It doesn't seem to be working. Not sure why.
-#            show:
-#                fields: ['name', 'gitUrl', 'updateBranch', 'updateOperation']
+            form:
+                fields: ['name', 'gitUri', 'updateBranch', 'updateOperation']
 #        - App\Entity\Project
