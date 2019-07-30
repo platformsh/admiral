@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20190723231827 extends AbstractMigration
+final class Version20190730213652 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -24,7 +24,7 @@ final class Version20190723231827 extends AbstractMigration
 
         $this->addSql('CREATE TABLE project (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, archetype_id INTEGER NOT NULL, name VARCHAR(255) NOT NULL, project_id VARCHAR(16) NOT NULL, region VARCHAR(255) NOT NULL)');
         $this->addSql('CREATE INDEX IDX_2FB3D0EE732C6CC7 ON project (archetype_id)');
-        $this->addSql('CREATE TABLE archetype (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name VARCHAR(255) NOT NULL, git_uri VARCHAR(255) NOT NULL)');
+        $this->addSql('CREATE TABLE archetype (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name VARCHAR(255) NOT NULL, git_uri VARCHAR(255) NOT NULL, update_operation VARCHAR(255) NOT NULL, update_branch VARCHAR(255) NOT NULL)');
     }
 
     public function down(Schema $schema) : void

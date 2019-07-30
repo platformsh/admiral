@@ -33,6 +33,16 @@ class Archetype
      */
     private $projects;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $updateBranch;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $updateOperation;
+
     public function __construct()
     {
         $this->projects = new ArrayCollection();
@@ -96,5 +106,34 @@ class Archetype
         }
 
         return $this;
+    }
+
+    public function getUpdateBranch(): ?string
+    {
+        return $this->updateBranch;
+    }
+
+    public function setUpdateBranch(string $updateBranch): self
+    {
+        $this->updateBranch = $updateBranch;
+
+        return $this;
+    }
+
+    public function getUpdateOperation(): ?string
+    {
+        return $this->updateOperation;
+    }
+
+    public function setUpdateOperation(?string $updateOperation): self
+    {
+        $this->updateOperation = $updateOperation;
+
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->getName();
     }
 }
