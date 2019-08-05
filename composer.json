@@ -8,6 +8,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "easycorp/easyadmin-bundle": "^2.2",
+        "platformsh/client": "^2.0",
         "platformsh/symfonyflex-bridge": "^2.1",
         "symfony/console": "*",
         "symfony/dotenv": "*",
