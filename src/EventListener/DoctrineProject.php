@@ -70,5 +70,13 @@ class DoctrineProject
         $pshProject->setVariable('env:UPDATE_REMOTE', $archetype->getGitUri());
         $pshProject->setVariable('env:UPDATE_BRANCH', $archetype->getUpdateBranch());
         $pshProject->setVariable('env:UPDATE_OPERATION', $archetype->getUpdateOperation());
+
+        // Initialize the project from the Archetype's Git repository.
+        // This will result in distinct Git histories as the initialize command
+        // does not preserve the source's history. However, that can be worked around
+        // in the update operation.
+        // An alternative would be to manually run a Git clone of the Archetype repository
+        // and manually push it to the newly created project.
+        $pshProject->getEnvironment('master')->initialize($archetype->getName(), $archetype->getGitUri());
     }
 }
