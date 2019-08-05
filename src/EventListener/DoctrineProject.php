@@ -79,4 +79,28 @@ class DoctrineProject
         // and manually push it to the newly created project.
         $pshProject->getEnvironment('master')->initialize($archetype->getName(), $archetype->getGitUri());
     }
+
+    /**
+     * Acts on an object just after it's been deleted.
+     *
+     * @param LifecycleEventArgs $args
+     */
+    public function postRemove(LifecycleEventArgs $args)
+    {
+        /** @var Project $project */
+        $project = $args->getObject();
+
+        // This event listener triggers for all deleted documents, but we care only about Projects.
+        if (! $project instanceof Project) {
+            return;
+        }
+
+        // When a project is deleted, delete the corresponding Platform.sh project.
+        // Note: The EasyAdminBundle's deletion verification warning should probably
+        // be made scarier, given that this is a very destructive operation.
+        $projectId = $project->getProjectId();
+        $pshProject = $this->client->getProject($projectId);
+        $subscriptionId = $pshProject->getSubscriptionId();
+        $this->client->getSubscription($subscriptionId)->delete();
+    }
 }
