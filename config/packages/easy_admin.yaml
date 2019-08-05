@@ -10,4 +10,10 @@ easy_admin:
                 fields: ['id', 'name', 'gitUri', 'projects']
             form:
                 fields: ['name', 'gitUri', 'updateBranch', 'updateOperation']
-#        - App\Entity\Project
+        Project:
+            class: App\Entity\Project
+            help: 'A Project on Platform.sh'
+            new:
+              fields: ['title', 'region', 'archetype']
+            edit:
+              fields: ['title']
