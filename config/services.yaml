@@ -31,3 +31,4 @@ services:
             - { name: doctrine.orm.entity_listener, entity: App\Entity\Project, event: prePersist }
             - { name: doctrine.orm.entity_listener, entity: App\Entity\Project, event: postPersist }
             - { name: doctrine.orm.entity_listener, entity: App\Entity\Project, event: postRemove }
+            - { name: doctrine.orm.entity_listener, entity: App\Entity\Project, event: postUpdate }

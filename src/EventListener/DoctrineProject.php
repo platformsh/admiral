@@ -84,6 +84,20 @@ class DoctrineProject
     }
 
     /**
+     * Acts on an object just after it has been updated.
+     *
+     * @param Project $project
+     * @param LifecycleEventArgs $args
+     */
+    public function postUpdate(Project $project, LifecycleEventArgs $args)
+    {
+        // The only editable part of a Project record locally is the title.
+        // Keep that in sync with Platform.sh's project.
+        $pshProject = $this->getPshProject($project);
+        $pshProject->update(['title' => $project->getTitle()]);
+    }
+
+    /**
      * Returns the Platform.sh project object that corresponds to the provided local Project reference.
      *
      * @param Project $project
