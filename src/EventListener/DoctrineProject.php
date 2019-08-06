@@ -6,6 +6,7 @@ namespace App\EventListener;
 use App\Entity\Project;
 use App\PlatformClient;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Platformsh\Client\Model\Project as PshProject;
 
 class DoctrineProject
 {
@@ -51,7 +52,7 @@ class DoctrineProject
         // Now that the project has been created on Platform.sh, set its environment
         // variables based on the project Archetype.  These will be needed by the source operations.
         $archetype = $project->getArchetype();
-        $pshProject = $this->client->getProject($project->getProjectId());
+        $pshProject = $this->getPshProject($project);
 
         $pshProject->setVariable('env:UPDATE_REMOTE', $archetype->getGitUri());
         $pshProject->setVariable('env:UPDATE_BRANCH', $archetype->getUpdateBranch());
@@ -77,9 +78,19 @@ class DoctrineProject
         // When a project is deleted, delete the corresponding Platform.sh project.
         // Note: The EasyAdminBundle's deletion verification warning should probably
         // be made scarier, given that this is a very destructive operation.
-        $projectId = $project->getProjectId();
-        $pshProject = $this->client->getProject($projectId);
+        $pshProject = $this->getPshProject($project);
         $subscriptionId = $pshProject->getSubscriptionId();
         $this->client->getSubscription($subscriptionId)->delete();
+    }
+
+    /**
+     * Returns the Platform.sh project object that corresponds to the provided local Project reference.
+     *
+     * @param Project $project
+     * @return PshProject
+     */
+    protected function getPshProject(Project $project) : PshProject
+    {
+        return $this->client->getProject($project->getProjectId());
     }
 }
