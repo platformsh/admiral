@@ -6,13 +6,22 @@ easy_admin:
             class: App\Entity\Archetype
             help: 'An Archetype is a template for a project. Projects will be updateable from their Archetype.'
             label: 'Site Archetype'
+            show:
+                fields: ['name', 'gitUri', 'updateBranch', 'updateOperation']
             list:
                 fields: ['id', 'name', 'gitUri', 'projects']
+                actions: ['show', 'edit', 'delete']
+                collapse_actions: true
             form:
                 fields: ['name', 'gitUri', 'updateBranch', 'updateOperation']
         Project:
             class: App\Entity\Project
             help: 'A Project on Platform.sh'
+            show:
+                fields: ['title', 'projectId', 'region', 'archetype']
+            list:
+                actions: ['show', 'edit', 'delete']
+                collapse_actions: true
             new:
               fields: ['title', 'region', 'archetype']
             edit:
