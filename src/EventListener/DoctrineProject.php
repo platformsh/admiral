@@ -22,18 +22,11 @@ class DoctrineProject
     /**
      * Acts on an object before its initial save.
      *
+     * @param Project $project
      * @param LifecycleEventArgs $args
      */
-    public function prePersist(LifecycleEventArgs $args)
+    public function prePersist(Project $project, LifecycleEventArgs $args)
     {
-        /** @var Project $project */
-        $project = $args->getObject();
-
-        // This event listener triggers for all saved documents, but we care only about Projects.
-        if (! $project instanceof Project) {
-            return;
-        }
-
         // Create the subscription.
         $subscription = $this->client->createSubscription($project->getRegion(), 'development', $project->getTitle());
 
@@ -50,18 +43,11 @@ class DoctrineProject
     /**
      * Acts on an object just after it has been saved.
      *
+     * @param Project $project
      * @param LifecycleEventArgs $args
      */
-    public function postPersist(LifecycleEventArgs $args)
+    public function postPersist(Project $project, LifecycleEventArgs $args)
     {
-        /** @var Project $project */
-        $project = $args->getObject();
-
-        // This event listener triggers for all saved documents, but we care only about Projects.
-        if (! $project instanceof Project) {
-            return;
-        }
-
         // Now that the project has been created on Platform.sh, set its environment
         // variables based on the project Archetype.  These will be needed by the source operations.
         $archetype = $project->getArchetype();
@@ -83,18 +69,11 @@ class DoctrineProject
     /**
      * Acts on an object just after it's been deleted.
      *
+     * @param Project $project
      * @param LifecycleEventArgs $args
      */
-    public function postRemove(LifecycleEventArgs $args)
+    public function postRemove(Project $project, LifecycleEventArgs $args)
     {
-        /** @var Project $project */
-        $project = $args->getObject();
-
-        // This event listener triggers for all deleted documents, but we care only about Projects.
-        if (! $project instanceof Project) {
-            return;
-        }
-
         // When a project is deleted, delete the corresponding Platform.sh project.
         // Note: The EasyAdminBundle's deletion verification warning should probably
         // be made scarier, given that this is a very destructive operation.
