@@ -16,6 +16,7 @@ easy_admin:
                 fields: ['name', 'gitUri', 'updateBranch', 'updateOperation']
         Project:
             class: App\Entity\Project
+            controller: App\Controller\ProjectController
             help: 'A Project on Platform.sh'
             show:
                 fields: ['title', 'projectId', 'region', 'archetype']
