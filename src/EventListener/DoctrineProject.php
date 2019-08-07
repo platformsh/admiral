@@ -4,9 +4,11 @@ declare(strict_types=1);
 namespace App\EventListener;
 
 use App\Entity\Project;
+use App\Message\SetProjectVariables;
 use App\PlatformClient;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Platformsh\Client\Model\Project as PshProject;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class DoctrineProject
 {
@@ -15,9 +17,15 @@ class DoctrineProject
      */
     protected $client;
 
-    public function __construct(PlatformClient $client)
+    /**
+     * @var MessageBusInterface
+     */
+    protected $messageBus;
+
+    public function __construct(PlatformClient $client, MessageBusInterface $messageBus)
     {
         $this->client = $client;
+        $this->messageBus = $messageBus;
     }
 
     /**
@@ -54,9 +62,7 @@ class DoctrineProject
         $archetype = $project->getArchetype();
         $pshProject = $this->getPshProject($project);
 
-        $pshProject->setVariable('env:UPDATE_REMOTE', $archetype->getGitUri());
-        $pshProject->setVariable('env:UPDATE_BRANCH', $archetype->getUpdateBranch());
-        $pshProject->setVariable('env:UPDATE_OPERATION', $archetype->getUpdateOperation());
+        $this->messageBus->dispatch(new SetProjectVariables($archetype->getId(), $project->getProjectId()));
 
         // Initialize the project from the Archetype's Git repository.
         // This will result in distinct Git histories as the initialize command
