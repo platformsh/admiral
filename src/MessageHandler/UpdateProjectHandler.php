@@ -6,12 +6,21 @@ namespace App\MessageHandler;
 use App\Entity\Project;
 use App\Message\UpdateProject;
 use App\PlatformClient;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Platformsh\Client\Model\Environment;
 use Platformsh\Client\Model\Project as PshProject;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
+/**
+ * Handler for triggering code updates on a project.
+ *
+ * This class makes a series of asynchronous calls to the Platform.sh API.
+ * It is reasonably fast but does take non-trivial time.  If triggering updates
+ * to a handful of projects it should be sufficient to run synchronously.  If
+ * trying to update more than a dozen or so projects at once it would be wise
+ * to switch to an asynchronous message bus transport.  Consult the Symfony
+ * documentation for how to do so.
+ */
 class UpdateProjectHandler implements MessageHandlerInterface
 {
 
@@ -21,7 +30,7 @@ class UpdateProjectHandler implements MessageHandlerInterface
     protected $client;
 
     /**
-     * @var EntityManager
+     * @var EntityManagerInterface
      */
     protected $em;
 
@@ -76,11 +85,9 @@ class UpdateProjectHandler implements MessageHandlerInterface
 
         if ($env) {
             if (!$env->isActive()) {
-                // Activate.
                 $env->activate();
             }
             else {
-                // Synchronzize.
                 $env->synchronize(true, true);
             }
         }

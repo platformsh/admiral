@@ -6,8 +6,16 @@ namespace App\Controller;
 use App\Entity\Project;
 use App\Message\UpdateProject;
 use App\PlatformClient;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Messenger\MessageBusInterface;
 
+/**
+ * Controller for the Project entity's admin pages.
+ *
+ * This class lets us add additional actions and batch actions for the Project
+ * entity specifically.  See the EasyAdminBundle documentation for more on how
+ * that works.
+ */
 class ProjectController extends AdminController
 {
     /**
@@ -43,6 +51,11 @@ class ProjectController extends AdminController
         $this->addFlash('notice', sprintf('Update queued for %d projects.', count($ids)));
     }
 
+    /**
+     * Updates a single project's update branch.
+     *
+     * @return RedirectResponse
+     */
     public function updateAction()
     {
         $id = $this->request->query->get('id');
@@ -50,7 +63,7 @@ class ProjectController extends AdminController
         $this->messageBus->dispatch(new UpdateProject((int)$id));
 
         $project = $this->em->getRepository(Project::class)->find($id);
-        $this->addFlash('notice', sprintf('Update queued for project %s', $project->getProjectId()));
+        $this->addFlash('notice', sprintf('Update queued for project %s (%s)', $project->getTitle(), $project->getProjectId()));
 
         // Redirect to the 'list' view of the given entity.
         return $this->redirectToRoute('easyadmin', array(
