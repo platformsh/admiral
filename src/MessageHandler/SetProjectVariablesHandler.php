@@ -9,7 +9,12 @@ use App\PlatformClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
-
+/**
+ * Handler for setting project variables.
+ *
+ * Various variables on a project need to be set based on the project's Archetype,
+ * and kept up to date.  This command resynchronizes those variables.
+ */
 class SetProjectVariablesHandler implements MessageHandlerInterface
 {
 
@@ -37,7 +42,6 @@ class SetProjectVariablesHandler implements MessageHandlerInterface
     public function __invoke(SetProjectVariables $message)
     {
         $archetype = $this->em->getRepository(Archetype::class)->find($message->getArchetypeId());
-
         $pshProject = $this->client->getProject($message->getPshProjectId());
 
         $pshProject->setVariable('env:UPDATE_REMOTE', $archetype->getGitUri());

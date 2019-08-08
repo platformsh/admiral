@@ -48,15 +48,11 @@ class UpdateProjectHandler implements MessageHandlerInterface
     public function __invoke(UpdateProject $message)
     {
         $id = $message->getProjectId();
-
         $project = $this->em->getRepository(Project::class)->find($id);
-
         $pshProject = $this->client->getProject($project->getProjectId());
-
         $archetype = $project->getArchetype();
 
         $env = $this->ensureEnvironment($pshProject, $archetype->getUpdateBranch());
-
         $env->runSourceOperation($archetype->getUpdateOperation());
     }
 
