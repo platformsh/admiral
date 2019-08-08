@@ -32,6 +32,11 @@ class DoctrineProject
     /**
      * Acts on an object before its initial save.
      *
+     * Because these actions must be taken before the Doctrine
+     * object is saved, they cannot go out on the message bus
+     * as that may be asynchronous. These actions must be taken
+     * synchronously.
+     *
      * @param Project $project
      * @param LifecycleEventArgs $args
      */
@@ -59,14 +64,11 @@ class DoctrineProject
     public function postPersist(Project $project, LifecycleEventArgs $args)
     {
         // Now that the project has been created on Platform.sh, set its environment
-        // variables based on the project Archetype.  These will be needed by the source operations.
+        // variables based on the project Archetype.  These will be needed by the source operation.
         $archetype = $project->getArchetype();
-        $pshProject = $this->getPshProject($project);
 
         $this->messageBus->dispatch(new SetProjectVariables($archetype->getId(), $project->getProjectId()));
-
         $this->messageBus->dispatch(new InitializeProjectCode($archetype->getId(), $project->getProjectId()));
-
     }
 
     /**
