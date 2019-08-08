@@ -8,7 +8,6 @@ use App\Entity\Project;
 use App\Message\SetProjectVariables;
 use App\PlatformClient;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
-use Platformsh\Client\Model\Project as PshProject;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 class DoctrineArchetype
@@ -45,16 +44,5 @@ class DoctrineArchetype
         foreach ($archetype->getProjects() as $project) {
             $this->messageBus->dispatch(new SetProjectVariables($archetype->getId(), $project->getProjectId()));
         }
-    }
-
-    /**
-     * Returns the Platform.sh project object that corresponds to the provided local Project reference.
-     *
-     * @param Project $project
-     * @return PshProject
-     */
-    protected function getPshProject(Project $project) : PshProject
-    {
-        return $this->client->getProject($project->getProjectId());
     }
 }
