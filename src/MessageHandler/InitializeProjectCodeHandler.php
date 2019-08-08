@@ -5,7 +5,6 @@ namespace App\MessageHandler;
 
 use App\Entity\Archetype;
 use App\Message\InitializeProjectCode;
-use App\Message\SetProjectVariables;
 use App\PlatformClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;

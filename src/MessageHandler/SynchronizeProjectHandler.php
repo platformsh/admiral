@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace App\MessageHandler;
 
-use App\Entity\Archetype;
 use App\Entity\Project;
-use App\Message\SetProjectVariables;
 use App\Message\SynchronizeProject;
 use App\PlatformClient;
 use Doctrine\ORM\EntityManagerInterface;
