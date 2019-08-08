@@ -21,9 +21,9 @@ easy_admin:
             show:
                 fields: ['title', 'projectId', 'region', 'archetype']
             list:
-                actions: ['show', 'edit', 'update', 'delete']
+                actions: ['show', 'edit', 'update', 'merge_update', 'delete']
                 collapse_actions: true
-                batch_actions: ['update']
+                batch_actions: ['update', 'merge_update']
             new:
               fields: ['title', 'region', 'archetype']
             edit:
