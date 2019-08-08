@@ -9,7 +9,7 @@ easy_admin:
             show:
                 fields: ['name', 'gitUri', 'updateBranch', 'updateOperation']
             list:
-                fields: ['id', 'name', 'gitUri', 'projects']
+                fields: ['name', 'gitUri', 'projects']
                 actions: ['show', 'edit', 'delete']
                 collapse_actions: true
             form:
@@ -21,6 +21,7 @@ easy_admin:
             show:
                 fields: ['title', 'projectId', 'region', 'archetype']
             list:
+                fields: ['title', 'projectId', 'region', 'archetype']
                 actions: ['show', 'edit', 'update', 'merge_update', 'delete']
                 collapse_actions: true
                 batch_actions: ['update', 'merge_update']
