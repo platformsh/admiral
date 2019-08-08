@@ -6,6 +6,7 @@ namespace App\EventListener;
 use App\Entity\Project;
 use App\Message\InitializeProjectCode;
 use App\Message\SetProjectVariables;
+use App\Message\SynchronizeProject;
 use App\PlatformClient;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Platformsh\Client\Model\Project as PshProject;
@@ -95,10 +96,7 @@ class DoctrineProject
      */
     public function postUpdate(Project $project, LifecycleEventArgs $args)
     {
-        // The only editable part of a Project record locally is the title.
-        // Keep that in sync with Platform.sh's project.
-        $pshProject = $this->getPshProject($project);
-        $pshProject->update(['title' => $project->getTitle()]);
+        $this->messageBus->dispatch(new SynchronizeProject($project->getId()));
     }
 
     /**

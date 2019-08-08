@@ -46,7 +46,7 @@ class InitializeProjectCodeHandler implements MessageHandlerInterface
     /**
      * Execute the command to populate a newly created project with code from its archetype.
      *
-     * @param SetProjectVariables $message
+     * @param InitializeProjectCode $message
      */
     public function __invoke(InitializeProjectCode $message)
     {

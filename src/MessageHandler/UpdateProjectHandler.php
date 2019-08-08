@@ -47,8 +47,7 @@ class UpdateProjectHandler implements MessageHandlerInterface
      */
     public function __invoke(UpdateProject $message)
     {
-        $id = $message->getProjectId();
-        $project = $this->em->getRepository(Project::class)->find($id);
+        $project = $this->em->getRepository(Project::class)->find($message->getProjectId());
         $pshProject = $this->client->getProject($project->getProjectId());
         $archetype = $project->getArchetype();
 
