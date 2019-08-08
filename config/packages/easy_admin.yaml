@@ -1,5 +1,5 @@
 easy_admin:
-    site_name: 'Flotilla'
+    site_name: 'Admiral'
     entities:
         # List the entity class name you want to manage
         Archetype:
