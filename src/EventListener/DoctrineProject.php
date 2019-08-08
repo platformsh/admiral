@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace App\EventListener;
 
 use App\Entity\Project;
+use App\Message\DeleteProject;
 use App\Message\InitializeProjectCode;
 use App\Message\SetProjectVariables;
 use App\Message\SynchronizeProject;
 use App\PlatformClient;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
-use Platformsh\Client\Model\Project as PshProject;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 class DoctrineProject
@@ -80,12 +80,7 @@ class DoctrineProject
      */
     public function postRemove(Project $project, LifecycleEventArgs $args)
     {
-        // When a project is deleted, delete the corresponding Platform.sh project.
-        // Note: The EasyAdminBundle's deletion verification warning should probably
-        // be made scarier, given that this is a very destructive operation.
-        $pshProject = $this->getPshProject($project);
-        $subscriptionId = $pshProject->getSubscriptionId();
-        $this->client->getSubscription($subscriptionId)->delete();
+        $this->messageBus->dispatch(new DeleteProject($project->getProjectId()));
     }
 
     /**
@@ -97,16 +92,5 @@ class DoctrineProject
     public function postUpdate(Project $project, LifecycleEventArgs $args)
     {
         $this->messageBus->dispatch(new SynchronizeProject($project->getId()));
-    }
-
-    /**
-     * Returns the Platform.sh project object that corresponds to the provided local Project reference.
-     *
-     * @param Project $project
-     * @return PshProject
-     */
-    protected function getPshProject(Project $project) : PshProject
-    {
-        return $this->client->getProject($project->getProjectId());
     }
 }
