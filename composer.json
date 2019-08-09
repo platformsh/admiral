@@ -19,7 +19,8 @@
         "symfony/yaml": "*"
     },
     "require-dev": {
-        "symfony/maker-bundle": "^1.12"
+        "symfony/maker-bundle": "^1.12",
+        "symfony/profiler-pack": "^1.0"
     },
     "config": {
         "preferred-install": {
