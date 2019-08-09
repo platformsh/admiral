@@ -33,6 +33,10 @@ services:
             - { name: doctrine.orm.entity_listener, entity: App\Entity\Project, event: postRemove }
             - { name: doctrine.orm.entity_listener, entity: App\Entity\Project, event: postUpdate }
 
+    App\EventListener\DoctrineProjectLoad:
+        tags:
+            - { name: doctrine.orm.entity_listener, entity: App\Entity\Project, event: postLoad }
+
     App\EventListener\DoctrineArchetype:
         tags:
             - { name: doctrine.orm.entity_listener, entity: App\Entity\Archetype, event: postUpdate }
