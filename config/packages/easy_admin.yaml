@@ -19,9 +19,17 @@ easy_admin:
             controller: App\Controller\ProjectController
             help: 'A Project on Platform.sh'
             show:
-                fields: ['title', 'projectId', 'region', 'archetype']
+                fields:
+                    - 'title'
+                    - { property: 'projectId', label: 'Platform.sh Project', template: 'admin/psh_project_id.html.twig' }
+                    - 'region'
+                    - 'archetype'
             list:
-                fields: ['title', 'projectId', 'region', 'archetype']
+                fields:
+                    - 'title'
+                    - { property: 'projectId', label: 'Platform.sh Project', template: 'admin/psh_project_id.html.twig' }
+                    - 'region'
+                    - 'archetype'
                 actions: ['show', 'edit', 'update', 'merge_update', 'delete']
                 collapse_actions: true
                 batch_actions: ['update', 'merge_update']
