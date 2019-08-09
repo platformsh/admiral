@@ -7,7 +7,7 @@ easy_admin:
             help: 'An Archetype is a template for a project. Projects will be updateable from their Archetype.'
             label: 'Site Archetype'
             show:
-                fields: ['name', 'gitUri', 'updateBranch', 'updateOperation']
+                fields: ['name', 'gitUri', 'updateBranch', 'updateOperation', 'projects']
             list:
                 fields: ['name', 'gitUri', 'projects']
                 actions: ['show', 'edit', 'delete']
