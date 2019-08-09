@@ -20,13 +20,6 @@ class DoctrineProjectLoad
      */
     protected $messageBus;
 
-    /**
-     * Cached array info as returned by the Client API.
-     *
-     * @var array
-     */
-    protected $accountInfo;
-
     public function __construct(PlatformClient $client, MessageBusInterface $messageBus)
     {
         $this->client = $client;
@@ -56,7 +49,7 @@ class DoctrineProjectLoad
 
     protected function pshProjectUrl(Project $project) : string
     {
-        return sprintf('https://console.platform.sh/%s/%s', $this->accountInfo()['username'], $project->getProjectId());
+        return $this->client->getProject($project->getProjectId())->getLink('#ui');
     }
 
     public function pshProjectEnvironmentUrl(Project $project, string $name) : string
@@ -68,17 +61,5 @@ class DoctrineProjectLoad
             return '';
         }
         return current($urls);
-    }
-
-
-    protected function accountInfo() : array
-    {
-        if (empty($this->accountInfo)) {
-            // This is wrong as it assumes the current user is also the project owner.
-            // That is usually the case, but not guaranteed.
-            $this->accountInfo = $this->client->getAccountInfo();
-        }
-
-        return $this->accountInfo;
     }
 }
