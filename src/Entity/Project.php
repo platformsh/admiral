@@ -83,6 +83,11 @@ class Project
         return $this->callbacks[__FUNCTION__]($name);
     }
 
+    public function updateEnvironmentUrl() : string
+    {
+        return $this->callbacks[__FUNCTION__]();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

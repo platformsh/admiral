@@ -38,7 +38,8 @@ class DoctrineProjectLoad
     {
         $lazyCallbacks = [
             'pshProjectUrl',
-            'pshProjectEnvironmentUrl'
+            'pshProjectEnvironmentUrl',
+            'updateEnvironmentUrl'
         ];
         foreach ($lazyCallbacks as $callback) {
             $project->setCallback($callback, function (...$args) use ($project, $callback) {
@@ -52,11 +53,22 @@ class DoctrineProjectLoad
         return $this->client->getProject($project->getProjectId())->getLink('#ui');
     }
 
+    protected function updateEnvironmentUrl(Project $project) : string
+    {
+        return $this->pshProjectEnvironmentUrl($project, $project->getArchetype()->getUpdateBranch());
+    }
+
     public function pshProjectEnvironmentUrl(Project $project, string $name) : string
     {
         $pshProjectId = $project->getProjectId();
         $pshProject = $this->client->getProject($pshProjectId);
-        $urls = $pshProject->getEnvironment($name)->getRouteUrls();
+        $env = $pshProject->getEnvironment($name);
+        // If the environment doesn't exist, bail out now with an empty URL.
+        if (!$env) {
+            return '';
+        }
+
+        $urls = $env->getRouteUrls();
         if (count($urls) == 0) {
             return '';
         }
