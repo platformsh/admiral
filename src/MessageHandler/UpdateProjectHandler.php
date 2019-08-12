@@ -84,8 +84,9 @@ class UpdateProjectHandler implements MessageHandlerInterface
             return;
         }
 
-        $env = $this->ensureEnvironment($pshProject, $archetype->getUpdateBranch());
-        $env->runSourceOperation($archetype->getUpdateOperation());
+        if ($env = $this->ensureEnvironment($pshProject, $archetype->getUpdateBranch())) {
+            $env->runSourceOperation($archetype->getUpdateOperation());
+        }
     }
 
     /**
@@ -107,21 +108,59 @@ class UpdateProjectHandler implements MessageHandlerInterface
      * @return Environment
      *   The Psh Environment object, now assured to be in a ready state.
      */
-    protected function ensureEnvironment(PshProject $pshProject, string $branch) : Environment
+    protected function ensureEnvironment(PshProject $pshProject, string $branch) : ?Environment
     {
         $env = $pshProject->getEnvironment($branch);
 
         if ($env) {
             if (!$env->isActive()) {
+                // The branch already exists but there's no running environment.
+                // Just turn it on.
                 $env->activate();
             }
             else {
+                // The environment already exists.  Synchronize its code/data
+                // from production first.
                 $env->synchronize(true, true);
             }
         }
         else {
-            // Branch
-            $pshProject->getEnvironment('master')->branch($branch);
+            // Make a new branch from scratch.
+            $masterBranch = $pshProject->getEnvironment('master');
+
+            if ($masterBranch->deployment_target !== 'local') {
+                // The above guard protects against usage on Dedicated clusters.
+                // In theory that should never happen, but...
+                $this->logger->error('Attempted to update project {title} ({pshProjectId}), but it is a Dedicated Enterprise cluster.', [
+                    'title' => $pshProject->title,
+                    'pshProjectId' => $pshProject->id,
+                ]);
+                return null;
+            }
+
+            if (!$masterBranch->has_code) {
+                // This guard protects against an uninitialized project.
+                // Again, this should be impossible but...
+                $this->logger->error('Attempted to update project {title} ({pshProjectId}), but it has not been initalized.', [
+                    'title' => $pshProject->title,
+                    'pshProjectId' => $pshProject->id,
+                ]);
+                return null;
+            }
+
+            // Wait for the branch operation to be available.  If it still isn't after
+            // 30 seconds, just give up.
+            // This normally only happens if you try to trigger an update very quickly
+            // after creating the project, or if master is in the middle of a deploy.
+            $timer = 0;
+            while(!$masterBranch->operationAvailable('branch', true)) {
+                sleep(1);
+                if ($timer++ > 30) {
+                    return null;
+                }
+            }
+
+            $masterBranch->branch($branch);
             $env = $pshProject->getEnvironment($branch);
         }
 
