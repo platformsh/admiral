@@ -1,1 +1,5 @@
-<a href="{{ item.pshProjectUrl }}" target="_blank">{{ value|nl2br }}</a>
+{% if value and item.pshProjectUrl %}
+    <a href="{{ item.pshProjectUrl }}" target="_blank">{{ value|nl2br }}</a>
+{% else %}
+    Project not found
+{% endif %}

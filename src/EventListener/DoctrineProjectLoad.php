@@ -6,6 +6,8 @@ namespace App\EventListener;
 use App\Entity\Project;
 use App\PlatformClient;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 class DoctrineProjectLoad
@@ -20,10 +22,16 @@ class DoctrineProjectLoad
      */
     protected $messageBus;
 
-    public function __construct(PlatformClient $client, MessageBusInterface $messageBus)
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    public function __construct(PlatformClient $client, MessageBusInterface $messageBus, LoggerInterface $logger)
     {
         $this->client = $client;
         $this->messageBus = $messageBus;
+        $this->logger = $logger;
     }
 
     /**
@@ -50,7 +58,15 @@ class DoctrineProjectLoad
 
     protected function pshProjectUrl(Project $project) : string
     {
-        return $this->client->getProject($project->getProjectId())->getLink('#ui');
+        $pshProject = $this->client->getProject($project->getProjectId());
+        if (!$pshProject) {
+            $this->logger->error('Platform.sh project {pshProjectId} not found for project {title}', [
+                'pshProjectId' => $project->getProjectId(),
+                'title' => $project->getTitle()
+            ]);
+            return '';
+        }
+        return $pshProject->getLink('#ui');
     }
 
     protected function updateEnvironmentUrl(Project $project) : string
@@ -62,6 +78,10 @@ class DoctrineProjectLoad
     {
         $pshProjectId = $project->getProjectId();
         $pshProject = $this->client->getProject($pshProjectId);
+        // If the project doesn't exist, bail out now with an empty URL.
+        if (!$pshProject) {
+            return '';
+        }
         $env = $pshProject->getEnvironment($name);
         // If the environment doesn't exist, bail out now with an empty URL.
         if (!$env) {

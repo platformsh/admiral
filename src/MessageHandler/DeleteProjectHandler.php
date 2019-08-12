@@ -43,7 +43,24 @@ class DeleteProjectHandler implements MessageHandlerInterface
     {
         $pshProject = $this->client->getProject($message->getPshProjectId());
 
-        $subscriptionId = $pshProject->getSubscriptionId();
-        $this->client->getSubscription($subscriptionId)->delete();
+        if (!$pshProject) {
+            // If the project doesn't exist, but the user asked for it to be deleted,
+            // then the desired post-condition is already met.  This is not an
+            // error condition, so just finish silently.
+            return;
+        }
+
+        try {
+            $subscriptionId = $pshProject->getSubscriptionId();
+            $sub = $this->client->getSubscription($subscriptionId);
+            if (!$sub) {
+                return;
+            }
+            $sub->delete();
+        } catch (\RuntimeException $e) {
+            // This happens if the subscription is not found. That indicates a
+            // problem on the server side that should already be logged, so
+            // just continue silently here.
+        }
     }
 }
