@@ -9,6 +9,7 @@ use App\PlatformClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Platformsh\Client\Model\Environment;
 use Platformsh\Client\Model\Project as PshProject;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 /**
@@ -34,10 +35,16 @@ class UpdateProjectHandler implements MessageHandlerInterface
      */
     protected $em;
 
-    public function __construct(PlatformClient $client, EntityManagerInterface $em)
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    public function __construct(PlatformClient $client, EntityManagerInterface $em, LoggerInterface $logger)
     {
         $this->client = $client;
         $this->em = $em;
+        $this->logger = $logger;
     }
 
     /**
@@ -48,8 +55,34 @@ class UpdateProjectHandler implements MessageHandlerInterface
     public function __invoke(UpdateProject $message)
     {
         $project = $this->em->getRepository(Project::class)->find($message->getProjectId());
+        if (is_null($project)) {
+            // This means the project was deleted sometime between when the merge was requested
+            // and now.  If that's the case then just log it and forget about it, since there's
+            // not much else to do.
+            $this->logger->error('Update requested for project {id}, but that project no longer exists.', [
+                'id' => $message->getProjectId()
+            ]);
+            return;
+        }
+
         $pshProject = $this->client->getProject($project->getProjectId());
+        if (!$pshProject) {
+            $this->logger->error('Platform.sh project {pshProjectId} not found for project {title}', [
+                'pshProjectId' => $project->getProjectId(),
+                'title' => $project->getTitle()
+            ]);
+            return;
+        }
+
         $archetype = $project->getArchetype();
+        if (is_null($archetype)) {
+            // This means the archetype was deleted between when this command was requested
+            // and now. Log it and move on since there's not much else we can do.
+            $this->logger->error('Cannot merge updates for project project {pshProjectId}. The archetype is missing.', [
+                'pshProjectId' => $pshProject->id,
+            ]);
+            return;
+        }
 
         $env = $this->ensureEnvironment($pshProject, $archetype->getUpdateBranch());
         $env->runSourceOperation($archetype->getUpdateOperation());
