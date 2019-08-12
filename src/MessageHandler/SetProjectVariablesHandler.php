@@ -70,7 +70,5 @@ class SetProjectVariablesHandler implements MessageHandlerInterface
         }
 
         $pshProject->setVariable('env:UPDATE_REMOTE', $archetype->getGitUri());
-        $pshProject->setVariable('env:UPDATE_BRANCH', $archetype->getUpdateBranch());
-        $pshProject->setVariable('env:UPDATE_OPERATION', $archetype->getUpdateOperation());
     }
 }
