@@ -73,7 +73,16 @@ class MergeUpdateProjectHandler implements MessageHandlerInterface
             ]);
             return;
         }
+
         $archetype = $project->getArchetype();
+        if (is_null($archetype)) {
+            // This means the archetype was deleted between when this command was requested
+            // and now. Log it and move on since there's not much else we can do.
+            $this->logger->error('Cannot merge updates for project project {pshProjectId}. The archetype is missing.', [
+                'pshProjectId' => $pshProject->id,
+            ]);
+            return;
+        }
 
         if ($env = $this->getActiveEnvironment($pshProject, $archetype->getUpdateBranch())) {
             $env->merge();
