@@ -14,9 +14,21 @@ All code in this repository is available under the MIT license.  See [`License.m
 
 Pull requests that add generally useful functionality may be accepted, but the goal is not to evolve Admiral into a complete application, just most of one.
 
+## Installation
+
+Although this application will happily run on Platform.sh as-is, it does not have to.  It can run anywhere that has access to an SQL database and can issue REST commands against the Platform.sh API, including your local laptop.
+
+1) Configure database credentials as needed for Symfony.  Consult the Symfony documentation for how to do so.  Alternatively, if running on Platform.sh this step is automated and not necessary.
+2) Run Doctrine Migrations to create the database: `php bin/console doctrine:migrations:migrate`.
+3) Set an environment variable for the Platform.sh API key, named `PLATFORMSH_CLI_TOKEN`.  (If running on Platform.sh, set a Platform.sh variable named `env:PLATFORMSH_CLI_TOKEN`.)  See the [Platform.sh documentation](https://docs.platform.sh/development/cli/api-tokens.html) for how to create an API key.
+
+Be aware that all projects created by this tool will be owned by the user associated with the API key.
+
 ## Architecture
 
 Admiral incorporates the [Platform.sh PHP Client](https://github.com/platformsh/platformsh-client-php), which is a simple wrapper around the Platform.sh API.  PHP implementations are encouraged to use that library.  Other languages may call the API directly or implement a similar library.
+
+It also includes the [Symfony Bridge](https://github.com/platformsh/symfonyflex-bridge) to streamline running Symfony on Platform.sh.  If you are not running Admiral on Platform.sh then this library has no effect.
 
 ### Data model
 
