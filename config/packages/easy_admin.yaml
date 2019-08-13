@@ -35,6 +35,9 @@ easy_admin:
                 collapse_actions: true
                 batch_actions: ['update', 'merge_update']
             new:
-              fields: ['title', 'region', 'archetype']
+              fields:
+                - 'title'
+                - { property: 'region', label: 'Region', type: 'App\Form\Type\RegionType' }
+                - 'archetype'
             edit:
               fields: ['title']
