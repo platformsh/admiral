@@ -1,30 +1,49 @@
-# Symfony 4 for Platform.sh
+# Admiral: A demonstration fleet management tool for Platform.sh
 
-This template provides a basic Symfony 4 skeleton.  It is configured for Production mode by default so the usual Symfony "welcome" page will not appear.  That can be adjusted in `.platform.app.yaml`.
+Admiral is an *incomplete* reference implementation for fleet management on Platform.sh using the [Platform.sh API](https://api.platform.sh/).  It is not a fully functional application, but provides a documented example of the core functionality of a fleet management tool.
 
-Symfony is a high-performance loosely-coupled PHP web development framework.
+While Admiral will be updated periodically, it is not intended as a deployable application as-is and will *not* be supported as such.  It has two recommended use cases:
 
-## Services
+1) Use as a reference and inspiration to develop your own fleet management tooling.  The code in this repository can then serve as a guildeline of the sort of operations that are needed and the error handling they will require.
 
-* PHP 7.3
-* MariaDB 10.2
+2) Use as the starting point of building a custom application for fleet management.  In that case, you are welcome to fork the code and modify/enhance it as you need but should not expect to update it from this repository afterward.
 
-## Post-install
+## License and Contributing
 
-1. This is a bare, empty Symfony project.  That means there will be no installation page after the site is deployed.  If you wish to switch Symfony into development mode, edit your `.platform.app.yaml` file and change the `variables.env.APP_ENV` property to "dev".  (Be sure to change it back before you go live.)
+All code in this repository is available under the MIT license.  See [`License.md`](license.md) for details.
 
-2. This bare skeleton does not include an ORM or any other bundles.  You are free to install your own as you need.  Many of them will be automatically configured on Platform.sh via environment variables.  See the `platformsh-flex-env.php` file in the `platformsh/symfonyflex-bridge` library (installed via Composer), as some bundles may require additional manual configuration.
+Pull requests that add generally useful functionality may be accepted, but the goal is not to evolve Admiral into a complete application, just most of one.
 
-## Customizations
+## Architecture
 
-The following changes have been made relative to a plain Symfony 4 project.  If using this project as a reference for your own existing project, replicate the changes below to your project.
+Admiral incorporates the [Platform.sh PHP Client](https://github.com/platformsh/platformsh-client-php), which is a simple wrapper around the Platform.sh API.  PHP implementations are encouraged to use that library.  Other languages may call the API directly or implement a similar library.
 
-* The `.platform.app.yaml`, `.platform/services.yaml`, and `.platform/routes.yaml` files have been added.  These provide Platform.sh-specific configuration and are present in all projects on Platform.sh.  You may customize them as you see fit.
-* The `.platform.template.yaml` file contains information needed by Platform.sh's project setup process for templates.  It may be safely ignored or removed.
-* An additional Composer library, [`platformsh/symfonyflex-bridge`](https://github.com/platformsh/symfonyflex-bridge), has been added.  It automatically maps Platform.sh's environment variables to Symfony environment variables where possible.  It leverages the [`platformsh/config-reader`](https://github.com/platformsh/config-reader-php) library.
+### Data model
 
-## References
+Admiral defines two entity types: `Archetype` and `Project`.
 
-* [Symfony](https://symfony.com/)
-* [Symfony on Platform.sh](https://docs.platform.sh/frameworks/symfony.html)
-* [PHP on Platform.sh](https://docs.platform.sh/languages/php.html)
+* An Archetype is a template for projects.  It consists of an upstream Git repository, a branch name to use for updates, and the name of a [Source Operation](https://docs.platform.sh/configuration/app/source-operations.html) that will perform code updates.
+
+* A Project has a one-to-one correspondence with a project on Platform.sh.  Only the title and project ID is stored locally.  The rest is pulled as needed from the Platform.sh API.  (Technically the region is also saved locally, but that's more a side effect of the creation process.)  A Project is always associated with a single Archetype from which it was created.
+
+### Overall flow
+
+Admiral uses the [EasyAdminBundle](https://symfony.com/doc/master/bundles/EasyAdminBundle/index.html) for the admin UI, available at `/admin` (the default path).  Consult its documentation for how the admin is configured.
+
+The system defines additional "actions" on the Project entity type that may be triggered by the user.  All actions delegate their behavior to messages using the Symfony [`MessageBus`](https://symfony.com/doc/current/messenger.html).  That allows all actions to be easily centralized in [message handlers](src/MessageHandler) where they can be easily reused.  The MessageBus also supports using asynchronous transports (queues), which may be transparently configured.  If you will be managing a large number of projects then using this tool then configuring an asynchronous transport is recommended to avoid blocking the user interface.
+
+It also defines two "batch actions" that trigger the same Message command as the single action, but for all selected Projects.
+
+Additionally, the system also implements several Doctrine lifecycle events on both Projects and Archetypes.  With one exception these listeners also defer their behavior to the MessageBus for centralized handling.  The lone exception is Project creation.  When a Project is created, the request must block until the corresponding Platform.sh Project is also created so that its project ID is available to be recorded.  As a result creating a new Project record is not always particular fast, but that cannot be changed without a considerable amount of additional synchronization code.
+
+### Commands
+
+With the exception of project creation, all behavior is implemented through the MessageBus component's command bus.  If reimplementing this functionality yourself in another framework or another language, these correspond, approximately, to the actions you will need to replicate.
+
+* [`InitializeProjectCode`](src/MessageHandler/InitalizeProjectCode.php) - After a Project is created, it must be initialized with code.  This Command uses the `initialize` API call to populate the Platform.sh Project with the code from the master branch of its Archetype.  Be aware, however, that this command begins a new Git history, so the project will *not* have a common Git history with its Archetype.
+* [`SynchronizeProject`](src/MessageHandler/SynchronizeProject.php) - Certain data must be kept in sync between a Project in Admiral and a Project on Platform.sh.  Specifically, the Project title is editable from the management console and there are project-level variables that need to be defined on the Platform.sh Project based on its Archetype.  This command sets all such values.  It is triggered on Project creation, Project update, and Archetype update (for all Projects on the Archetype). 
+* [`UpdateProject`](src/MessageHandler/UpdateProject.php) - The core of the process. The Update command will first ensure that a branch of the appropriate name (as defined by the Archetype) exists, and is up to date (using the Platform.sy `Sync` command).  It will then trigger the Archetype-specified Source Operation on that environment.  Actually updating code on that branch is the responsibility of the Source Operation itself.
+* [`MergeUpdateProject`](src/MessageHandler/MergeUpdateProject.php) - If an update branch is available, and it has updated code relative to the `master` branch, it will trigger a `Merge` command to merge the updates to `master` and trigger a new deployment.  Otherwise it has no effect.
+* [`DeleteProject`](src/MessageHandler/DeleteProjectHandler.php) - When a Project is deleted in the management console it is also deleted on Platform.sh.  (Note: This is a very destructive operation with no undo command.  You may wish to lock this action down to selected users.)
+
+In concept, virtually any Platform.sh API call or set of calls can be wrapped up into a Message command and exposed through the UI.  Whether a given task makes more sense to implement in a fleet UI or to have users follow links to the Project and perform them there is left as an exercise for the implementer.
