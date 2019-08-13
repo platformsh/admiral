@@ -64,8 +64,21 @@ class SynchronizeProjectHandler implements MessageHandlerInterface
             return;
         }
 
+        $archetype = $project->getArchetype();
+        if (is_null($archetype)) {
+            // This means the archetype was deleted between when this command was requested
+            // and now. Log it and move on since there's not much else we can do.
+            $this->logger->error('Cannot sync configuration for project {pshProjectId}. The archetype is missing.', [
+                'pshProjectId' => $pshProject->id,
+            ]);
+            return;
+        }
+
         // The only editable part of a Project record locally is the title.
         // Keep that in sync with Platform.sh's project.
         $pshProject->update(['title' => $project->getTitle()]);
+
+        // Update variables on the project, based on the archetype.
+        $pshProject->setVariable('env:UPDATE_REMOTE', $archetype->getGitUri());
     }
 }

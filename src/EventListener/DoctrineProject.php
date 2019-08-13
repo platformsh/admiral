@@ -6,7 +6,6 @@ namespace App\EventListener;
 use App\Entity\Project;
 use App\Message\DeleteProject;
 use App\Message\InitializeProjectCode;
-use App\Message\SetProjectVariables;
 use App\Message\SynchronizeProject;
 use App\PlatformClient;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
@@ -68,7 +67,9 @@ class DoctrineProject
         // variables based on the project Archetype.  These will be needed by the source operation.
         $archetype = $project->getArchetype();
 
-        $this->messageBus->dispatch(new SetProjectVariables($archetype->getId(), $project->getProjectId()));
+        // Technically a full sync here is slightly wasteful, but not by enough to matter
+        // and using it here gives us fewer code paths.
+        $this->messageBus->dispatch(new SynchronizeProject($project->getId()));
         $this->messageBus->dispatch(new InitializeProjectCode($archetype->getId(), $project->getProjectId()));
     }
 

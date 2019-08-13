@@ -7,7 +7,6 @@ use App\Entity\Project;
 use App\PlatformClient;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 class DoctrineProjectLoad
