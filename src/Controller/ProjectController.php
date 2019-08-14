@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Project;
+use App\Message\BackupProduction;
 use App\Message\MergeUpdateProject;
 use App\Message\UpdateProject;
 use App\PlatformClient;
@@ -64,6 +65,20 @@ class ProjectController extends AdminController
     }
 
     /**
+     * Backup a list of projects.
+     *
+     * @param array $ids
+     */
+    public function backupBatchAction(array $ids)
+    {
+        foreach ($ids as $id) {
+            $this->messageBus->dispatch(new BackupProduction((int)$id));
+        }
+
+        $this->addFlash('notice', sprintf('Backup queued for %d projects.', count($ids)));
+    }
+
+    /**
      * Updates a single project's update branch.
      *
      * @return RedirectResponse
@@ -84,7 +99,6 @@ class ProjectController extends AdminController
         ));
     }
 
-
     /**
      * Merge a single project's update branch.
      *
@@ -98,6 +112,22 @@ class ProjectController extends AdminController
 
         $project = $this->em->getRepository(Project::class)->find($id);
         $this->addFlash('notice', sprintf('Merge queued for project %s (%s)', $project->getTitle(), $project->getProjectId()));
+
+        // Redirect to the 'list' view of the given entity.
+        return $this->redirectToRoute('easyadmin', array(
+            'action' => 'list',
+            'entity' => $this->request->query->get('entity'),
+        ));
+    }
+
+    public function backupAction()
+    {
+        $id = $this->request->query->get('id');
+
+        $this->messageBus->dispatch(new BackupProduction((int)$id));
+
+        $project = $this->em->getRepository(Project::class)->find($id);
+        $this->addFlash('notice', sprintf('Backup queued for project %s (%s)', $project->getTitle(), $project->getProjectId()));
 
         // Redirect to the 'list' view of the given entity.
         return $this->redirectToRoute('easyadmin', array(
