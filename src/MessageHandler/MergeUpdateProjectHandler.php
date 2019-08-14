@@ -85,6 +85,8 @@ class MergeUpdateProjectHandler implements MessageHandlerInterface
         }
 
         if ($env = $this->getActiveEnvironment($pshProject, $archetype->getUpdateBranch())) {
+            $masterBranch = $pshProject->getEnvironment('master');
+            $masterBranch->backup();
             $env->merge();
         }
     }
