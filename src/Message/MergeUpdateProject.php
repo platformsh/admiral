@@ -8,18 +8,5 @@ namespace App\Message;
  */
 class MergeUpdateProject
 {
-    /**
-     * @var int
-     */
-    protected $projectId;
-
-    public function __construct(int $projectId)
-    {
-        $this->projectId = $projectId;
-    }
-
-    public function getProjectId() : int
-    {
-        return $this->projectId;
-    }
+    use ProjectMessage;
 }
