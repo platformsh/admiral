@@ -1,0 +1,13 @@
+<table class="activity-log">
+    <thead> <th>Type</th> <th>Description</th> <th>Completed</th> <th>Result</th> </thead>
+    <tbody>
+    {% for activity in value %}
+        <tr>
+            <td>{{ activity.data.type }}</td>
+            <td>{{ activity.data.description | raw }}</td>
+            <td>{{ activity.data.completed_at |date }}</td>
+            <td>{{ activity.data.result }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

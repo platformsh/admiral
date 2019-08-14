@@ -88,6 +88,11 @@ class Project
         return $this->callbacks[__FUNCTION__]();
     }
 
+    public function recentActivities() : iterable
+    {
+        return $this->callbacks[__FUNCTION__]();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

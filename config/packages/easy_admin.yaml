@@ -1,5 +1,9 @@
 easy_admin:
     site_name: 'Admiral'
+    design:
+        assets:
+            css:
+                - '/styles/styles.css'
     entities:
         # List the entity class name you want to manage
         Archetype:
@@ -24,6 +28,7 @@ easy_admin:
                     - { property: 'projectId', label: 'Platform.sh Project', template: 'admin/psh_project_id.html.twig' }
                     - 'region'
                     - 'archetype'
+                    - { property: 'recentActivities', label: 'Recent Activities', template: 'admin/recent_activities.html.twig' }
             list:
                 fields:
                     - 'title'

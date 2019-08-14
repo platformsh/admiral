@@ -11,6 +11,9 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 class DoctrineProjectLoad
 {
+
+    protected const ACTIVITY_COUNT = 10;
+
     /**
      * @var PlatformClient
      */
@@ -46,13 +49,25 @@ class DoctrineProjectLoad
         $lazyCallbacks = [
             'pshProjectUrl',
             'pshProjectEnvironmentUrl',
-            'updateEnvironmentUrl'
+            'updateEnvironmentUrl',
+            'recentActivities',
         ];
         foreach ($lazyCallbacks as $callback) {
             $project->setCallback($callback, function (...$args) use ($project, $callback) {
                 return $this->$callback($project, ...$args);
             });
         }
+    }
+
+    protected function recentActivities(Project $project) : iterable
+    {
+        $pshProject = $this->client->getProject($project->getProjectId());
+
+        $masterBranch = $pshProject->getEnvironment('master');
+
+        $activities = $masterBranch->getActivities(static::ACTIVITY_COUNT);
+
+        return $activities;
     }
 
     protected function pshProjectUrl(Project $project) : string
