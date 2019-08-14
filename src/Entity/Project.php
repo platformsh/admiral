@@ -93,6 +93,11 @@ class Project
         return $this->callbacks[__FUNCTION__]();
     }
 
+    public function planSize() : string
+    {
+        return $this->callbacks[__FUNCTION__]();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

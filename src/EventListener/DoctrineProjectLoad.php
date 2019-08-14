@@ -51,6 +51,7 @@ class DoctrineProjectLoad
             'pshProjectEnvironmentUrl',
             'updateEnvironmentUrl',
             'recentActivities',
+            'planSize',
         ];
         foreach ($lazyCallbacks as $callback) {
             $project->setCallback($callback, function (...$args) use ($project, $callback) {
@@ -59,12 +60,19 @@ class DoctrineProjectLoad
         }
     }
 
+    protected function planSize(Project $project) : string
+    {
+        $pshProject = $this->client->getProject($project->getProjectId());
+        $subId = $pshProject->getSubscriptionId();
+        $subscription = $this->client->getSubscription($subId);
+
+        return trim($subscription->plan);
+    }
+
     protected function recentActivities(Project $project) : iterable
     {
         $pshProject = $this->client->getProject($project->getProjectId());
-
         $masterBranch = $pshProject->getEnvironment('master');
-
         $activities = $masterBranch->getActivities(static::ACTIVITY_COUNT);
 
         return $activities;
