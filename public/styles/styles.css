@@ -1,3 +1,7 @@
-table.activity-log thead {
+table.activity-log > thead {
     border-bottom: 1px solid gray;
+}
+
+table.activity-log > tbody > tr {
+    border-bottom: 1px dotted gray;
 }
