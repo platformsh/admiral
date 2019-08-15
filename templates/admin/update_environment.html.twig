@@ -1,0 +1,10 @@
+{% if not value %}
+    Inactive
+{%  elseif value.status == 'dirty' %}
+    Deploying...
+{% elseif value.status == 'inactive' %}
+    Inactive
+{% else %}
+    {#  This means value.status is "active" #}
+    <a href="{{ value.getRouteUrls()[0] }}" target="_blank">Preview</a>
+{% endif %}

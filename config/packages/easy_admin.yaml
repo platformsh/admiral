@@ -36,7 +36,7 @@ easy_admin:
                     - { property: 'projectId', label: 'Platform.sh Project', template: 'admin/psh_project_id.html.twig' }
                     - 'region'
                     - 'archetype'
-                    - { property: 'updateEnvironmentUrl', label: 'Preview Updates', template: 'admin/update_environment_url.html.twig' }
+                    - { property: 'updateEnvironment', label: 'Preview Updates', template: 'admin/update_environment.html.twig' }
                 actions: ['show', 'edit', 'update', 'merge_update', 'backup', 'delete']
                 collapse_actions: true
                 batch_actions: ['update', 'merge_update', 'backup', 'delete']

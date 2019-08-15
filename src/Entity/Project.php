@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Platformsh\Client\Model\Environment;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProjectRepository")
@@ -70,20 +71,7 @@ class Project
         return $this->callbacks[__FUNCTION__]();
     }
 
-    /**
-     * Returns the URL to a given environment on the corresponding Platform.sh Project.
-     *
-     * @param string $name
-     *   The name of the environment.
-     * @return string
-     *   The URL to the environment.
-     */
-    public function pshProjectEnvironmentUrl(string $name) : string
-    {
-        return $this->callbacks[__FUNCTION__]($name);
-    }
-
-    public function updateEnvironmentUrl() : string
+    public function updateEnvironment() : ?Environment
     {
         return $this->callbacks[__FUNCTION__]();
     }

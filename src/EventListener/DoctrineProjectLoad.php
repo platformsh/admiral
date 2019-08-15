@@ -6,6 +6,7 @@ namespace App\EventListener;
 use App\Entity\Project;
 use App\PlatformClient;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Platformsh\Client\Model\Environment;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -48,8 +49,7 @@ class DoctrineProjectLoad
     {
         $lazyCallbacks = [
             'pshProjectUrl',
-            'pshProjectEnvironmentUrl',
-            'updateEnvironmentUrl',
+            'updateEnvironment',
             'recentActivities',
             'planSize',
         ];
@@ -91,22 +91,24 @@ class DoctrineProjectLoad
         return $pshProject->getLink('#ui');
     }
 
-    protected function updateEnvironmentUrl(Project $project) : string
+    protected function updateEnvironment(Project $project) : ?Environment
     {
-        return $this->pshProjectEnvironmentUrl($project, $project->getArchetype()->getUpdateBranch());
+        return $this->pshProjectEnvironment($project, $project->getArchetype()->getUpdateBranch());
+    }
+
+    protected function pshProjectEnvironment(Project $project, string $name) : ?Environment
+    {
+        $pshProject = $this->client->getProject($project->getProjectId());
+        if (!$pshProject) {
+            return null;
+        }
+        return $pshProject->getEnvironment($name) ?: null;
     }
 
     public function pshProjectEnvironmentUrl(Project $project, string $name) : string
     {
-        $pshProjectId = $project->getProjectId();
-        $pshProject = $this->client->getProject($pshProjectId);
-        // If the project doesn't exist, bail out now with an empty URL.
-        if (!$pshProject) {
-            return '';
-        }
-        $env = $pshProject->getEnvironment($name);
-        // If the environment doesn't exist, bail out now with an empty URL.
-        if (!$env) {
+        $env = $this->pshProjectEnvironment($project, $name);
+        if (is_null($env)) {
             return '';
         }
 
