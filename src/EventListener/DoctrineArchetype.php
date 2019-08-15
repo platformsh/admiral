@@ -5,7 +5,7 @@ namespace App\EventListener;
 
 use App\Entity\Archetype;
 use App\Entity\Project;
-use App\Message\SetProjectVariables;
+use App\Message\SynchronizeProject;
 use App\PlatformClient;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -42,7 +42,7 @@ class DoctrineArchetype
 
         /** @var Project $project */
         foreach ($archetype->getProjects() as $project) {
-            $this->messageBus->dispatch(new SetProjectVariables($archetype->getId(), $project->getProjectId()));
+            $this->messageBus->dispatch(new SynchronizeProject($project->getId()));
         }
     }
 }
