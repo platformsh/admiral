@@ -28,6 +28,7 @@ easy_admin:
                     - { property: 'projectId', label: 'Platform.sh Project', template: 'admin/psh_project_id.html.twig' }
                     - 'region'
                     - 'archetype'
+                    - { property: 'updateEnvironment', label: 'Update branch', type: string, template: 'admin/update_environment.html.twig' }
                     - { property: 'planSize', label: 'Plan size', type: 'string' }
                     - { property: 'recentActivities', label: 'Recent Activities', template: 'admin/recent_activities.html.twig' }
             list:
