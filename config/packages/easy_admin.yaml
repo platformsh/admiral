@@ -39,7 +39,7 @@ easy_admin:
                     - { property: 'updateEnvironmentUrl', label: 'Preview Updates', template: 'admin/update_environment_url.html.twig' }
                 actions: ['show', 'edit', 'update', 'merge_update', 'backup', 'delete']
                 collapse_actions: true
-                batch_actions: ['update', 'merge_update', 'backup']
+                batch_actions: ['update', 'merge_update', 'backup', 'delete']
             new:
               fields:
                 - 'title'
