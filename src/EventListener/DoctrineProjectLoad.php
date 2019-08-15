@@ -104,18 +104,4 @@ class DoctrineProjectLoad
         }
         return $pshProject->getEnvironment($name) ?: null;
     }
-
-    public function pshProjectEnvironmentUrl(Project $project, string $name) : string
-    {
-        $env = $this->pshProjectEnvironment($project, $name);
-        if (is_null($env)) {
-            return '';
-        }
-
-        $urls = $env->getRouteUrls();
-        if (count($urls) == 0) {
-            return '';
-        }
-        return current($urls);
-    }
 }
