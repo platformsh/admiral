@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\EventListener;
 
 use App\Entity\Project;
+use App\Message\CloneProjectCode;
 use App\Message\DeleteProject;
 use App\Message\InitializeProjectCode;
 use App\Message\SynchronizeProject;
@@ -70,7 +71,10 @@ class DoctrineProject
         // Technically a full sync here is slightly wasteful, but not by enough to matter
         // and using it here gives us fewer code paths.
         $this->messageBus->dispatch(new SynchronizeProject($project->getId()));
-        $this->messageBus->dispatch(new InitializeProjectCode($archetype->getId(), $project->getProjectId()));
+
+        $this->messageBus->dispatch(new CloneProjectCode($archetype->getId(), $project->getProjectId()));
+
+        //$this->messageBus->dispatch(new InitializeProjectCode($archetype->getId(), $project->getProjectId()));
     }
 
     /**

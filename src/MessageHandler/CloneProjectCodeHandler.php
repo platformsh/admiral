@@ -4,11 +4,17 @@ declare(strict_types=1);
 namespace App\MessageHandler;
 
 use App\Entity\Archetype;
+use App\Git\Repository;
+use App\Message\CloneProjectCode;
 use App\Message\InitializeProjectCode;
 use App\PlatformClient;
+use App\Service\GitApi;
+use App\Service\GitRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Process\Process;
 
 /**
  * Handles initializing code in a project.
@@ -24,8 +30,10 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
  * Archetype repository and manually push it to the newly created
  * project.  That would be considerably more work, however.
  */
-class InitializeProjectCodeHandler implements MessageHandlerInterface
+class CloneProjectCodeHandler implements MessageHandlerInterface
 {
+
+    const ARCHETYPE_REPOSITORY_DIR = '../var/archetypes';
 
     /**
      * @var PlatformClient
@@ -42,11 +50,17 @@ class InitializeProjectCodeHandler implements MessageHandlerInterface
      */
     protected $logger;
 
-    public function __construct(PlatformClient $client, EntityManagerInterface $em, LoggerInterface $logger)
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
+
+    public function __construct(PlatformClient $client, EntityManagerInterface $em, LoggerInterface $logger, ParameterBagInterface $parameterBag)
     {
         $this->client = $client;
         $this->em = $em;
         $this->logger = $logger;
+        $this->parameterBag = $parameterBag;
     }
 
     /**
@@ -54,7 +68,7 @@ class InitializeProjectCodeHandler implements MessageHandlerInterface
      *
      * @param InitializeProjectCode $message
      */
-    public function __invoke(InitializeProjectCode $message)
+    public function __invoke(CloneProjectCode $message)
     {
         $archetype = $this->em->getRepository(Archetype::class)->find($message->getArchetypeId());
         if (is_null($archetype)) {
@@ -68,6 +82,15 @@ class InitializeProjectCodeHandler implements MessageHandlerInterface
 
         $pshProject = $this->client->getProject($message->getPshProjectId());
 
-        // ...
+        $repo = new Repository(static::ARCHETYPE_REPOSITORY_DIR, $archetype->getGitUri(), $this->logger);
+
+        // Ensure a copy of the archetype's repository exists locally and is up to date.
+        $repo->ensureRepository();
+
+        // Add new project Git URI as a remote
+        $repo->addRemote($pshProject->id, $pshProject->getGitUrl());
+
+        // Push to project remote.
+        $repo->pushToRemote($pshProject->id, 'master');
     }
 }
