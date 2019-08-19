@@ -8,13 +8,10 @@ use App\Git\Repository;
 use App\Message\CloneProjectCode;
 use App\Message\InitializeProjectCode;
 use App\PlatformClient;
-use App\Service\GitApi;
-use App\Service\GitRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
-use Symfony\Component\Process\Process;
 
 /**
  * Handles initializing code in a project.
@@ -33,6 +30,13 @@ use Symfony\Component\Process\Process;
 class CloneProjectCodeHandler implements MessageHandlerInterface
 {
 
+    /**
+     * The root directory to hold all of the archetype repos.
+     *
+     * @todo Make this sensitive to the var directory via configuration
+     * in the ParameterBag, or similar, rather than hard coding it with
+     * a .. in it.
+     */
     const ARCHETYPE_REPOSITORY_DIR = '../var/archetypes';
 
     /**
@@ -50,17 +54,11 @@ class CloneProjectCodeHandler implements MessageHandlerInterface
      */
     protected $logger;
 
-    /**
-     * @var ParameterBagInterface
-     */
-    protected $parameterBag;
-
-    public function __construct(PlatformClient $client, EntityManagerInterface $em, LoggerInterface $logger, ParameterBagInterface $parameterBag)
+    public function __construct(PlatformClient $client, EntityManagerInterface $em, LoggerInterface $logger)
     {
         $this->client = $client;
         $this->em = $em;
         $this->logger = $logger;
-        $this->parameterBag = $parameterBag;
     }
 
     /**
