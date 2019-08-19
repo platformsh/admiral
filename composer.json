@@ -18,6 +18,7 @@
         "symfony/messenger": "4.3.*",
         "symfony/monolog-bundle": "^3.4",
         "symfony/orm-pack": "^1.0",
+        "symfony/process": "4.3.*",
         "symfony/var-dumper": "4.3.*",
         "symfony/yaml": "*"
     },

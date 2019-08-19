@@ -315,6 +315,9 @@
     "symfony/polyfill-php73": {
         "version": "1.11-dev"
     },
+    "symfony/process": {
+        "version": "v4.3.3"
+    },
     "symfony/profiler-pack": {
         "version": "v1.0.4"
     },
