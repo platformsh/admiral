@@ -21,10 +21,14 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
  * trying to update more than a dozen or so projects at once it would be wise
  * to switch to an asynchronous message bus transport.  Consult the Symfony
  * documentation for how to do so.
+ *
+ * Error handling is generally "log and fail silently", because the Message Bus
+ * is designed to be asynchronous.  It may be running in a queue long after
+ * the UI operation that triggered it, so there's no way to send notifications
+ * back up.
  */
 class UpdateProjectHandler implements MessageHandlerInterface
 {
-
     /**
      * @var PlatformClient
      */
@@ -56,9 +60,6 @@ class UpdateProjectHandler implements MessageHandlerInterface
     {
         $project = $this->em->getRepository(Project::class)->find($message->getProjectId());
         if (is_null($project)) {
-            // This means the project was deleted sometime between when the merge was requested
-            // and now.  If that's the case then just log it and forget about it, since there's
-            // not much else to do.
             $this->logger->error('Update requested for project {id}, but that project no longer exists.', [
                 'id' => $message->getProjectId()
             ]);
@@ -76,8 +77,6 @@ class UpdateProjectHandler implements MessageHandlerInterface
 
         $archetype = $project->getArchetype();
         if (is_null($archetype)) {
-            // This means the archetype was deleted between when this command was requested
-            // and now. Log it and move on since there's not much else we can do.
             $this->logger->error('Cannot merge updates for project project {pshProjectId}. The archetype is missing.', [
                 'pshProjectId' => $pshProject->id,
             ]);

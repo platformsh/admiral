@@ -13,6 +13,11 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 /**
  * Handler for backing up a project.
+ *
+ * Error handling is generally "log and fail silently", because the Message Bus
+ * is designed to be asynchronous.  It may be running in a queue long after
+ * the UI operation that triggered it, so there's no way to send notifications
+ * back up.
  */
 class BackupProductionHandler implements MessageHandlerInterface
 {
@@ -41,15 +46,12 @@ class BackupProductionHandler implements MessageHandlerInterface
     /**
      * Executes a SynchronizeProjectHandler command.
      *
-     * @param DeleteProject $message
+     * @param BackupProduction $message
      */
     public function __invoke(BackupProduction $message)
     {
         $project = $this->em->getRepository(Project::class)->find($message->getProjectId());
         if (is_null($project)) {
-            // This means the project was deleted sometime between when the merge was requested
-            // and now.  If that's the case then just log it and forget about it, since there's
-            // not much else to do.
             $this->logger->error('Backup requested for project {id}, but that project no longer exists.', [
                 'id' => $message->getProjectId()
             ]);

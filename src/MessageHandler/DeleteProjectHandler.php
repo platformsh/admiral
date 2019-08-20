@@ -15,6 +15,12 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
  *
  * Note: The EasyAdminBundle's deletion verification warning should probably
  * be made scarier, given that this is a very destructive operation.
+ *
+ * Error handling is generally "log and fail silently", because the Message Bus
+ * is designed to be asynchronous.  It may be running in a queue long after
+ * the UI operation that triggered it, so there's no way to send notifications
+ * back up.
+ *
  */
 class DeleteProjectHandler implements MessageHandlerInterface
 {
