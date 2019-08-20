@@ -58,12 +58,20 @@ class CloneProjectCodeHandler implements MessageHandlerInterface
      */
     protected $repositoryParentDir;
 
-    public function __construct(PlatformClient $client, EntityManagerInterface $em, LoggerInterface $logger, string $repositoryParentDir)
+    /**
+     * A full file path.
+     *
+     * @var string
+     */
+    protected $privateKeyFile;
+
+    public function __construct(PlatformClient $client, EntityManagerInterface $em, LoggerInterface $logger, string $repositoryParentDir, string $privateKeyFile)
     {
         $this->client = $client;
         $this->em = $em;
         $this->logger = $logger;
         $this->repositoryParentDir = $repositoryParentDir;
+        $this->privateKeyFile = $privateKeyFile;
     }
 
     /**
@@ -84,7 +92,7 @@ class CloneProjectCodeHandler implements MessageHandlerInterface
         $pshProject = $this->client->getProject($message->getPshProjectId());
 
         try {
-            $repo = new Repository($this->repositoryParentDir, $archetype->getGitUri(), $this->logger);
+            $repo = new Repository($this->repositoryParentDir, $archetype->getGitUri(), $this->privateKeyFile, $this->logger);
 
             $repo->ensureRepository();
             $repo->addRemote($pshProject->id, $pshProject->getGitUrl());

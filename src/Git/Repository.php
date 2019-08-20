@@ -50,10 +50,18 @@ class Repository
      */
     protected $logger;
 
-    public function __construct(string $repositoryParentDirectory, string $upstreamUri, LoggerInterface $logger = null)
+    /**
+     * A full file path.
+     *
+     * @var string
+     */
+    protected $privateKeyFile;
+
+    public function __construct(string $repositoryParentDirectory, string $upstreamUri, string $privateKeyFile, LoggerInterface $logger = null)
     {
         $this->repositoryParentDirectory = $repositoryParentDirectory;
         $this->upstreamUri = $upstreamUri;
+        $this->privateKeyFile = $privateKeyFile;
         $this->logger = $logger ?? new NullLogger();
 
         $this->repositoryDirectoryName = basename(parse_url($this->upstreamUri, PHP_URL_PATH), '.git');
@@ -159,7 +167,7 @@ class Repository
     {
         $process = new Process($command, $workingDir, [
             // Some but not all Git commands need SSH, so force it to use our key if so.
-            // 'GIT_SSH_COMMAND' => "ssh -i {$this->privateKeyFilename}",
+            'GIT_SSH_COMMAND' => "ssh -i {$this->privateKeyFile}",
             // Some but not all Git commands will push to Platform.sh, and those should not wait.
             'PLATFORMSH_PUSH_NO_WAIT' => 1
         ]);
