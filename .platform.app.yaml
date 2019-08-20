@@ -12,8 +12,8 @@ build:
 variables:
     env:
         # Tell Symfony to always install in production-mode.
-        APP_ENV: 'prod'
-        APP_DEBUG: 0
+        APP_ENV: 'dev'
+        APP_DEBUG: 1
 
 # The hooks that will be performed when the package is deployed.
 hooks:
@@ -41,6 +41,7 @@ mounts:
     "/var/cache": "shared:files/cache"
     "/var/log": "shared:files/log"
     "/var/sessions": "shared:files/sessions"
+    "/var/archetypes": "shared:files/sessions"
 
 # The configuration of app when it is exposed to the web.
 web:
