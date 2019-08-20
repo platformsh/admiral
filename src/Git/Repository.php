@@ -6,6 +6,7 @@ namespace  App\Git;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
 /**
@@ -170,11 +171,18 @@ class Repository
             // Some but not all Git commands will push to Platform.sh, and those should not wait.
             'PLATFORMSH_PUSH_NO_WAIT' => 1
         ]);
-        $process->start();
 
         $this->logger->debug('Running Git Command: {command}', ['command' => $process->getCommandLine()]);
 
-        $process->wait();
+        try {
+            $process->mustRun();
+        } catch (ProcessFailedException $e) {
+            $this->logger->error("Process failed. Exit code: {exitCode} {message}", [
+                'message' => $e->getMessage(),
+                'exitCode' => $process->getExitCode(),
+                'exception' => $e,
+            ]);
+        }
 
         if ($process->getExitCode()) {
             throw new \RuntimeException($process->getExitCodeText(), $process->getExitCode());
