@@ -135,23 +135,7 @@ class Repository
      */
     protected function runGitCommandInRepo(array $command)
     {
-        $process = new Process($command, $this->repositoryWorkingDir, [
-            // Some but not all Git commands need SSH, so force it to use our key if so.
-            // 'GIT_SSH_COMMAND' => "ssh -i {$this->privateKeyFilename}",
-            // Some but not all Git commands will push to Platform.sh, and those should not wait.
-            'PLATFORMSH_PUSH_NO_WAIT' => 1
-        ]);
-
-        try {
-            $process->mustRun();
-        } catch (ProcessFailedException $e) {
-            $this->logger->error("Process failed. Exit code: {exitCode}. Message: {message}.  Git command: {command}", [
-                'message' => $e->getMessage(),
-                'exitCode' => $process->getExitCode(),
-                'command' => $process->getCommandLine(),
-                'exception' => $e,
-            ]);
-        }
+        $this->runGitCommand($command,  $this->repositoryWorkingDir);
     }
 
     /**
@@ -168,8 +152,12 @@ class Repository
      */
     protected function gitClone(string $originUri, string $directory)
     {
-        // We need a custom CWD for this one, as it's going to run without the repository already existing.
-        $process = new Process(['git', 'clone', $originUri, $directory], $this->repositoryParentDirectory, [
+        $this->runGitCommand(['git', 'clone', $originUri, $directory], $this->repositoryParentDirectory);
+    }
+
+    protected function runGitCommand(array $command, $workingDir)
+    {
+        $process = new Process($command, $workingDir, [
             // Some but not all Git commands need SSH, so force it to use our key if so.
             // 'GIT_SSH_COMMAND' => "ssh -i {$this->privateKeyFilename}",
             // Some but not all Git commands will push to Platform.sh, and those should not wait.
