@@ -23,7 +23,7 @@ hooks:
         bin/console cache:clear
     deploy: |
         set -e
-        bin/console assets:install --symlink --relative public
+        # bin/console assets:install --symlink --relative public
         bin/console doctrine:migrations:migrate
         bin/console cache:clear
 
