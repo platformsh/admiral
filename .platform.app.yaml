@@ -24,6 +24,7 @@ hooks:
     deploy: |
         set -e
         bin/console assets:install --symlink --relative public
+        bin/console doctrine:migrations:execute
         bin/console cache:clear
 
 # The relationships of the application with services or other applications.
