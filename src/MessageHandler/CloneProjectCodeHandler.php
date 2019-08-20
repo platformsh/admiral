@@ -77,10 +77,22 @@ class CloneProjectCodeHandler implements MessageHandlerInterface
 
         $pshProject = $this->client->getProject($message->getPshProjectId());
 
-        $repo = new Repository(static::ARCHETYPE_REPOSITORY_DIR, $archetype->getGitUri(), $this->logger);
+        try {
+            $repo = new Repository(static::ARCHETYPE_REPOSITORY_DIR, $archetype->getGitUri(), $this->logger);
 
-        $repo->ensureRepository();
-        $repo->addRemote($pshProject->id, $pshProject->getGitUrl());
-        $repo->pushToRemote($pshProject->id, 'master');
+            $repo->ensureRepository();
+            $repo->addRemote($pshProject->id, $pshProject->getGitUrl());
+            $repo->pushToRemote($pshProject->id, 'master');
+        } catch (\RuntimeException $e) {
+            $this->logger->error('Caught runtime exception: {message}', [
+                'message' => $e->getMessage(),
+                'exception' => $e,
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('Caught exception: {message}', [
+                'message' => $e->getMessage(),
+                'exception' => $e,
+            ]);
+        }
     }
 }
