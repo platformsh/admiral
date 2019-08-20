@@ -59,6 +59,8 @@ class Repository
         $this->repositoryDirectoryName = basename(parse_url($this->upstreamUri, PHP_URL_PATH), '.git');
 
         $this->repositoryWorkingDir = $this->repositoryParentDirectory . '/' . $this->repositoryDirectoryName;
+
+        $this->logger->debug('Repository parent directory is: {dir}', ['dir' => $this->repositoryParentDirectory]);
     }
 
     /**
@@ -177,7 +179,7 @@ class Repository
         try {
             $process->mustRun();
         } catch (ProcessFailedException $e) {
-            $this->logger->error("Process failed. Exit code: {exitCode} {message}", [
+            $this->logger->error("Process failed. Exit code: {exitCode}. Message: {message}", [
                 'message' => $e->getMessage(),
                 'exitCode' => $process->getExitCode(),
                 'exception' => $e,
