@@ -141,14 +141,16 @@ class Repository
             // Some but not all Git commands will push to Platform.sh, and those should not wait.
             'PLATFORMSH_PUSH_NO_WAIT' => 1
         ]);
-        $process->start();
 
-        $this->logger->debug('Running Git Command: {command}', ['command' => $process->getCommandLine()]);
-
-        $process->wait();
-
-        if ($process->getExitCode()) {
-            throw new \RuntimeException($process->getExitCodeText(), $process->getExitCode());
+        try {
+            $process->mustRun();
+        } catch (ProcessFailedException $e) {
+            $this->logger->error("Process failed. Exit code: {exitCode}. Message: {message}.  Git command: {command}", [
+                'message' => $e->getMessage(),
+                'exitCode' => $process->getExitCode(),
+                'command' => $process->getCommandLine(),
+                'exception' => $e,
+            ]);
         }
     }
 
@@ -174,20 +176,15 @@ class Repository
             'PLATFORMSH_PUSH_NO_WAIT' => 1
         ]);
 
-        $this->logger->debug('Running Git Command: {command}', ['command' => $process->getCommandLine()]);
-
         try {
             $process->mustRun();
         } catch (ProcessFailedException $e) {
-            $this->logger->error("Process failed. Exit code: {exitCode}. Message: {message}", [
+            $this->logger->error("Process failed. Exit code: {exitCode}. Message: {message}.  Git command: {command}", [
                 'message' => $e->getMessage(),
                 'exitCode' => $process->getExitCode(),
+                'command' => $process->getCommandLine(),
                 'exception' => $e,
             ]);
-        }
-
-        if ($process->getExitCode()) {
-            throw new \RuntimeException($process->getExitCodeText(), $process->getExitCode());
         }
     }
 }
