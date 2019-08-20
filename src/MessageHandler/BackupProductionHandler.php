@@ -5,7 +5,6 @@ namespace App\MessageHandler;
 
 use App\Entity\Project;
 use App\Message\BackupProduction;
-use App\Message\DeleteProject;
 use App\PlatformClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;

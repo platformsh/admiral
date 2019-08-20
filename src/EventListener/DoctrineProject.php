@@ -6,7 +6,6 @@ namespace App\EventListener;
 use App\Entity\Project;
 use App\Message\CloneProjectCode;
 use App\Message\DeleteProject;
-use App\Message\InitializeProjectCode;
 use App\Message\SynchronizeProject;
 use App\PlatformClient;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
