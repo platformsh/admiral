@@ -53,11 +53,17 @@ class CloneProjectCodeHandler implements MessageHandlerInterface
      */
     protected $logger;
 
-    public function __construct(PlatformClient $client, EntityManagerInterface $em, LoggerInterface $logger)
+    /**
+     * @var string
+     */
+    protected $repositoryParentDir;
+
+    public function __construct(PlatformClient $client, EntityManagerInterface $em, LoggerInterface $logger, string $repositoryParentDir)
     {
         $this->client = $client;
         $this->em = $em;
         $this->logger = $logger;
+        $this->repositoryParentDir = $repositoryParentDir;
     }
 
     /**
@@ -78,7 +84,7 @@ class CloneProjectCodeHandler implements MessageHandlerInterface
         $pshProject = $this->client->getProject($message->getPshProjectId());
 
         try {
-            $repo = new Repository(static::ARCHETYPE_REPOSITORY_DIR, $archetype->getGitUri(), $this->logger);
+            $repo = new Repository($this->repositoryParentDir, $archetype->getGitUri(), $this->logger);
 
             $repo->ensureRepository();
             $repo->addRemote($pshProject->id, $pshProject->getGitUrl());
