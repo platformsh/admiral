@@ -52,4 +52,3 @@ web:
             root: "public"
             # The front-controller script to send non-static requests to.
             passthru: "/index.php"
-
