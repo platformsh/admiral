@@ -21,6 +21,15 @@ Although this application will happily run on Platform.sh as-is, it does not hav
 1) Configure database credentials as needed for Symfony.  Consult the Symfony documentation for how to do so.  Alternatively, if running on Platform.sh this step is automated and not necessary.
 2) Run Doctrine Migrations to create the database: `php bin/console doctrine:migrations:migrate`.
 3) Set an environment variable for the Platform.sh API key, named `PLATFORMSH_CLI_TOKEN`.  (If running on Platform.sh, set a Platform.sh variable named `env:PLATFORMSH_CLI_TOKEN`.)  See the [Platform.sh documentation](https://docs.platform.sh/development/cli/api-tokens.html) for how to create an API key.
+4) Ensure that the environment where Admiral is running has access to an SSH keypair that is also registered on the account associated with the API key.  Some of the Git commands Admiral runs (when using `CloneProjectCode` below) require SSH access.  If the shell already has it, that's fine. If not, you can specify the path to a private key file in Symfony's `config/services.yaml` file (not to be confused with the Platform.sh file of the same name) by binding it to the `$privateKeyFile` parameter, like so:
+
+```yaml
+services:
+    _defaults:
+        bind:
+            $repositoryParentDir: '%kernel.project_dir%/var/archetypes'
+            $privateKeyFile: '~/.ssh/deploy_key'
+```
 
 Be aware that all projects created by this tool will be owned by the user associated with the API key.
 
@@ -53,6 +62,7 @@ Additionally, the system also implements several Doctrine lifecycle events on bo
 With the exception of project creation, all behavior is implemented through the MessageBus component's command bus.  If reimplementing this functionality yourself in another framework or another language, these correspond, approximately, to the actions you will need to replicate.
 
 * [`InitializeProjectCode`](src/MessageHandler/InitalizeProjectCode.php) - After a Project is created, it must be initialized with code.  This Command uses the `initialize` API call to populate the Platform.sh Project with the code from the master branch of its Archetype.  Be aware, however, that this command begins a new Git history, so the project will *not* have a common Git history with its Archetype.
+* [`CloneProjectCode`](src/MessageHandler/CloneProjectCode.php) - Alternatively, if a shared Git history is needed, this command demonstrates how to do so manually with a Git push.  It's a bit more involved and requires the extra SSH key setup above, but a shared Git history makes subsequent merge-based updates easier.
 * [`SynchronizeProject`](src/MessageHandler/SynchronizeProject.php) - Certain data must be kept in sync between a Project in Admiral and a Project on Platform.sh.  Specifically, the Project title is editable from the management console and there are project-level variables that need to be defined on the Platform.sh Project based on its Archetype.  This command sets all such values.  It is triggered on Project creation, Project update, and Archetype update (for all Projects on the Archetype). 
 * [`UpdateProject`](src/MessageHandler/UpdateProject.php) - The core of the process. The Update command will first ensure that a branch of the appropriate name (as defined by the Archetype) exists, and is up to date (using the Platform.sy `Sync` command).  It will then trigger the Archetype-specified Source Operation on that environment.  Actually updating code on that branch is the responsibility of the Source Operation itself.
 * [`MergeUpdateProject`](src/MessageHandler/MergeUpdateProject.php) - If an update branch is available, and it has updated code relative to the `master` branch, it will trigger a `Merge` command to merge the updates to `master` and trigger a new deployment.  Otherwise it has no effect.
