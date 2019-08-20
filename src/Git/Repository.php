@@ -57,7 +57,7 @@ class Repository
      */
     protected $privateKeyFile;
 
-    public function __construct(string $repositoryParentDirectory, string $upstreamUri, string $privateKeyFile, LoggerInterface $logger = null)
+    public function __construct(string $repositoryParentDirectory, string $upstreamUri, string $privateKeyFile = null, LoggerInterface $logger = null)
     {
         $this->repositoryParentDirectory = $repositoryParentDirectory;
         $this->upstreamUri = $upstreamUri;
@@ -165,12 +165,18 @@ class Repository
 
     protected function runGitCommand(array $command, $workingDir)
     {
-        $process = new Process($command, $workingDir, [
-            // Some but not all Git commands need SSH, so force it to use our key if so.
-            'GIT_SSH_COMMAND' => "ssh -i {$this->privateKeyFile}",
-            // Some but not all Git commands will push to Platform.sh, and those should not wait.
-            'PLATFORMSH_PUSH_NO_WAIT' => 1
-        ]);
+        // Some but not all Git commands will push to Platform.sh, and those should not wait.
+        $env['PLATFORMSH_PUSH_NO_WAIT'] = 1;
+
+        // Some but not all Git commands need SSH.  If the user the application runs
+        // as has access to a private key whose public key is registered with the same
+        // Platform.sh user as the CLI TOKEN is for, this option is unnecessary. If
+        // specified in the Symfony configuration, however, then the private key file
+        // will be injected into the Git command to use for the connection.
+        if ($this->privateKeyFile) {
+            $env['GIT_SSH_COMMAND'] = "ssh -i {$this->privateKeyFile}";
+        }
+        $process = new Process($command, $workingDir, $env);
 
         try {
             $process->mustRun();

@@ -65,7 +65,7 @@ class CloneProjectCodeHandler implements MessageHandlerInterface
      */
     protected $privateKeyFile;
 
-    public function __construct(PlatformClient $client, EntityManagerInterface $em, LoggerInterface $logger, string $repositoryParentDir, string $privateKeyFile)
+    public function __construct(PlatformClient $client, EntityManagerInterface $em, LoggerInterface $logger, string $repositoryParentDir, string $privateKeyFile = null)
     {
         $this->client = $client;
         $this->em = $em;
@@ -97,13 +97,10 @@ class CloneProjectCodeHandler implements MessageHandlerInterface
             $repo->ensureRepository();
             $repo->addRemote($pshProject->id, $pshProject->getGitUrl());
             $repo->pushToRemote($pshProject->id, 'master');
-        } catch (\RuntimeException $e) {
-            $this->logger->error('Caught runtime exception: {message}', [
-                'message' => $e->getMessage(),
-                'exception' => $e,
-            ]);
         } catch (\Exception $e) {
-            $this->logger->error('Caught exception: {message}', [
+            $this->logger->error('Cloning project code from archetype {archetype} to project {pshProjectId} failed: {message}', [
+                'archetype' => $archetype->getName(),
+                'pshProjectId' => $message->getPshProjectId(),
                 'message' => $e->getMessage(),
                 'exception' => $e,
             ]);
