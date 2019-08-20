@@ -60,7 +60,7 @@ class Repository
 
         $this->repositoryWorkingDir = $this->repositoryParentDirectory . '/' . $this->repositoryDirectoryName;
 
-        $this->logger->debug('Repository parent directory is: {dir}', ['dir' => realpath($this->repositoryParentDirectory)]);
+        $this->logger->debug('Repository parent directory is: {dir}', ['dir' => $this->repositoryParentDirectory]);
     }
 
     /**
