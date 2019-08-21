@@ -6,7 +6,8 @@ framework:
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
             async:
-                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+#                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                dsn: 'doctrine://default'
                 options:
                     redeliver_timeout: 120
             # failed: 'doctrine://default?queue_name=failed'
