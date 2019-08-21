@@ -12,8 +12,8 @@ build:
 variables:
     env:
         # Tell Symfony to always install in production-mode.
-        APP_ENV: 'dev'
-        APP_DEBUG: 1
+        APP_ENV: 'prod'
+        APP_DEBUG: 0
 
 # The hooks that will be performed when the package is deployed.
 hooks:
@@ -40,19 +40,24 @@ disk: 2048
 # The mounts that will be performed when the package is deployed.
 mounts:
     '/var/cache':
-        source: local
+        source: service
+        service: files
         source_path: 'cache'
     '/var/log':
-        source: local
+        source: service
+        service: files
         source_path: 'log'
     '/var/sessions':
-        source: local
+        source: service
+        service: files
         source_path: 'sessions'
     '/var/archetypes':
-        source: local
+        source: service
+        service: files
         source_path: 'archetypes'
     '/.ssh':
-        source: local
+        source: service
+        service: files
         source_path: 'ssh'
 
 # The configuration of app when it is exposed to the web.
@@ -63,3 +68,14 @@ web:
             root: "public"
             # The front-controller script to send non-static requests to.
             passthru: "/index.php"
+
+workers:
+    queue:
+        commands:
+            # The background worker will self-terminate after a certain
+            # number of items is processed.  Platform.sh will then restart
+            # it automatically.  That helps to avoid memory leaks from
+            # services that don't clean up after themselves, like Doctrine.
+            # Set this to a reasonable value for your available memory.
+            start: |
+                php bin/console messenger:consume async --limit=5
