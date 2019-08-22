@@ -2,9 +2,11 @@
 
 Admiral is an *incomplete* reference implementation for fleet management on Platform.sh using the [Platform.sh API](https://api.platform.sh/).  It is not a fully functional application, but provides a documented example of the core functionality of a fleet management tool.
 
-While Admiral will be updated periodically, it is not intended as a deployable application as-is and will *not* be supported as such.  It has two recommended use cases:
+> **While Admiral will be updated periodically, it is not intended as a deployable application as-is and will *not* be supported as such.  As is, it entirely lacks user authentication so deploying it in a publicly accessible fashion is a horribly bad idea.**
 
-1) Use as a reference and inspiration to develop your own fleet management tooling.  The code in this repository can then serve as a guildeline of the sort of operations that are needed and the error handling they will require.
+It has two recommended use cases:
+
+1) Use as a reference and inspiration to develop your own fleet management tooling.  The code in this repository can then serve as a guilde line of the sort of operations that are needed and the error handling they will require.
 
 2) Use as the starting point of building a custom application for fleet management.  In that case, you are welcome to fork the code and modify/enhance it as you need but should not expect to update it from this repository afterward.
 
@@ -16,22 +18,24 @@ Pull requests that add generally useful functionality may be accepted, but the g
 
 ## Installation
 
-Although this application will happily run on Platform.sh as-is, it does not have to.  It can run anywhere that has access to an SQL database and can issue REST commands against the Platform.sh API, including your local laptop.
+Although this application will happily run on Platform.sh as-is, it does not have to.  It can run anywhere that has access to a MySQL/MariaDB database and can issue REST commands against the Platform.sh API, including your local laptop.
 
 1) Configure database credentials as needed for Symfony.  Consult the Symfony documentation for how to do so.  Alternatively, if running on Platform.sh this step is automated and not necessary.
 2) Run Doctrine Migrations to create the database: `php bin/console doctrine:migrations:migrate`.
 3) Set an environment variable for the Platform.sh API key, named `PLATFORMSH_CLI_TOKEN`.  (If running on Platform.sh, set a Platform.sh variable named `env:PLATFORMSH_CLI_TOKEN`.)  See the [Platform.sh documentation](https://docs.platform.sh/development/cli/api-tokens.html) for how to create an API key.
 4) Ensure that the environment where Admiral is running has access to an SSH keypair that is also registered on the account associated with the API key.  Some of the Git commands Admiral runs (when using `CloneProjectCode` below) require SSH access.  If the shell already has it, that's fine. If not, you can specify the path to a private key file in Symfony's `config/services.yaml` file (not to be confused with the Platform.sh file of the same name) by binding it to the `$privateKeyFile` parameter, like so:
 
-```yaml
-services:
-    _defaults:
-        bind:
-            $repositoryParentDir: '%kernel.project_dir%/var/archetypes'
-            $privateKeyFile: '~/.ssh/deploy_key'
-```
+    ```yaml
+    services:
+        _defaults:
+            bind:
+                $repositoryParentDir: '%kernel.project_dir%/var/archetypes'
+                $privateKeyFile: '~/.ssh/deploy_key'
+    ```
 
-Be aware that all projects created by this tool will be owned by the user associated with the API key.
+5) Start the Symfony queue worker.  In the default configuration, Admiral uses a Doctrine-backed worker to handle the Message Bus that executes most commands.  It therefore needs to have the background worker process started.  Run `php bin/console messenger:consume async` and see the [Symfony Messagenger documentation](https://symfony.com/doc/current/messenger.html) for further details.  Note that if you are running this application on Platform.sh this step is handled automatically with a [worker container](https://docs.platform.sh/configuration/app/workers.html) and there is nothing you need to do.
+
+Be aware that all projects created by this tool will be owned by the user associated with the API key.  For that reason using a fleet-specific user is recommended.
 
 ## Architecture
 
