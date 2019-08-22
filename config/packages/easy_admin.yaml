@@ -48,3 +48,4 @@ easy_admin:
                 - 'archetype'
             edit:
               fields: ['title']
+
