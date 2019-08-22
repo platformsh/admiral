@@ -10,6 +10,8 @@ use App\Message\InitializeProjectCode;
 use App\PlatformClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Lock\Factory;
+use Symfony\Component\Lock\Store\FlockStore;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
 /**
@@ -91,7 +93,11 @@ class CloneProjectCodeHandler implements MessageHandlerInterface
 
         $pshProject = $this->client->getProject($message->getPshProjectId());
 
+        $lockFactory = new Factory(new FlockStore(sys_get_temp_dir()));
+        $lock = $lockFactory->createLock('git');
         try {
+            $lock->acquire(true);
+
             $repo = new Repository($this->repositoryParentDir, $archetype->getGitUri(), $this->privateKeyFile, $this->logger);
 
             $repo->ensureRepository();
@@ -104,6 +110,8 @@ class CloneProjectCodeHandler implements MessageHandlerInterface
                 'message' => $e->getMessage(),
                 'exception' => $e,
             ]);
+        } finally {
+            $lock->release();
         }
     }
 }
