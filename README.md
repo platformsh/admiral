@@ -2,7 +2,7 @@
 
 Admiral is an *incomplete* reference implementation for fleet management on Platform.sh using the [Platform.sh API](https://api.platform.sh/).  It is not a fully functional application, but provides a documented example of the core functionality of a fleet management tool.
 
-> **While Admiral will be updated periodically, it is not intended as a deployable application as-is and will *not* be supported as such.  As is, it entirely lacks user authentication so deploying it in a publicly accessible fashion is a horribly bad idea.**
+> **While Admiral will be updated periodically, it is not actively maintained. It is not intended as a deployable application as-is and will *not* be supported as such.  As is, it entirely lacks user authentication so deploying it in a publicly accessible fashion is a horribly bad idea.**
 
 It has two recommended use cases:
 
